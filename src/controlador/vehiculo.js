@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { Vehiculo } from "../modelo/vehiculo.js"
-import { insertar, actualizar, eliminar, restaurar, buscar, id } from '../validacion/vehiculo.js'
+import { insertar, actualizar, eliminar, restaurar,reConfigurar, buscar, id } from '../validacion/vehiculo.js'
 import pool from '../modelo/bdConfig.js'
 
 
@@ -178,8 +178,8 @@ rutas.post("/registrar", insertar, async (req, res) => {
 
 rutas.post("/actualizar", actualizar, async (req, res) => {
     try {
-        const { id, idtipo, idusuario, placa, modelo, modificado, usuario } = req.body
-        const datos = { id, idtipo, idusuario,  placa, modelo, modificado, usuario }
+        const { id,  idusuario, placa, modelo, modificado, usuario } = req.body
+        const datos = { id, idusuario, placa, modelo, modificado, usuario }
         const resultado = await vehiculo.actualizar(datos)
 
         if (resultado?.existe === 1)
@@ -258,5 +258,23 @@ rutas.post("/buscareliminados", buscar, async (req, res) => {
     }
 
 })
+
+rutas.post("/re-configurar", reConfigurar, async (req, res) => {
+    console.log(req.body)
+    try {
+
+        const { idvehiculo, idtipo, modificado, usuario } = req.body;
+        const datos = {
+            idvehiculo, idtipo, modificado, usuario
+        }
+        const resultado = await vehiculo.reConfigurar(datos)
+        return res.json({ data: resultado, ok: true, msg: 'La configuracion del vehiculo se actualizo correctamente, vuelva a registrar asientos' })
+    } catch (error) {
+        console.log(error)
+        return res.json({ ok: false, msg: 'Error, Elimine los registros dependientes' })
+    }
+
+})
+
 
 export default rutas;

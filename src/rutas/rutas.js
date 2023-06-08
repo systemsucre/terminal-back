@@ -8,7 +8,8 @@ import jwt from 'jsonwebtoken'
 import usuario from "../controlador/usuario.js";
 import vehiculo from "../controlador/vehiculo.js";
 import asiento from "../controlador/asiento.js";
-//funciones disponibles para el administrador, solicitante y hasta para el laboratorista
+import ruta from "../controlador/rutas.js";
+import viaje from "../controlador/viaje.js";
 
 
 
@@ -67,9 +68,10 @@ rutas.get('/', async (req, res) => {
 
                 const sqlInfo = `SELECT UPPER(r.rol) as rol, r.numero as numRol,
                     u.username, concat(UPPER(left(u.nombre,1)),LOWER(SUBSTRING(u.nombre,2))) as nombre, 
-                    concat(UPPER(left(u.apellido1,1)),LOWER(SUBSTRING(u.apellido1,2))) as apellido
+                    concat(UPPER(left(u.apellido1,1)),LOWER(SUBSTRING(u.apellido1,2))) as apellido, e.id as empresa
                     from usuario u 
                     inner join rol r on u.idrol = r.id
+                    inner join empresa e on e.id = u.idempresa
                     where u.username = ${pool.escape(req.query.user)} and u.pass = ${pool.escape(req.query.pass)} `;
                 const [info] = await pool.query(sqlInfo)
                 console.log("datos de la consulta: ", info[0])
@@ -81,6 +83,7 @@ rutas.get('/', async (req, res) => {
                     'apellido': info[0].apellido,
                     'rol': info[0].rol,
                     'numRol': info[0].numRol,
+                    "minuto":info[0].empresa,
                     ok: true,
                     msg: 'Acceso correcto'
                 })
@@ -176,6 +179,8 @@ const rolesAdminUser = (req, res, next) => {
 rutas.use("/usuario", verificacion, rolesAdminUser, usuario)
 rutas.use("/vehiculo", verificacion, rolesAdminUser, vehiculo)
 rutas.use("/asiento", verificacion, rolesAdminUser, asiento)
+rutas.use("/ruta", verificacion, rolesAdminUser, ruta)
+rutas.use("/viaje", verificacion, rolesAdminUser, viaje)
 
 
 

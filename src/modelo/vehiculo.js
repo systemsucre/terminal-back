@@ -140,14 +140,14 @@ export class Vehiculo {
 
     // MUESTRA EL REGISTRO de los asientos del vehiculo
     ver = async (id) => {
-        const sqlVehiculo = `select v.id, t.id as idtipo, t.numero,  v.idusuario, v.placa,
+        const sqlVehiculo = `select v.id, t.id as idtipo, t.numero,t.tipo,  v.idusuario, v.placa,
             v.modelo,t.capacidad
             from vehiculo v 
             inner join tipo t on t.id = v.idtipo
             where v.id = ${pool.escape(id)}`
 
         const [vehiculo] = await pool.query(sqlVehiculo)
-            const sqlAsiento = `select  a.id as idasiento, a.numero as numeroAsiento, 
+        const sqlAsiento = `select  a.id as idasiento, a.numero as numeroAsiento, 
             au.id as idubicaicon, au.ubicacion, v.placa, t.tipo, t.numero, 
             t.capacidad
             from vehiculo v 
@@ -192,7 +192,7 @@ export class Vehiculo {
             `SELECT u.id as id, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as nombre  from usuario u
             inner join empresa e on e.id = u.idempresa
             inner join rol r on r.id = u.idrol
-            where e.id = ${pool.escape(idempresa)} and r.numero = 3
+            where e.id = ${pool.escape(idempresa)} and r.numero = 3 and u.eliminado = false
               `;
         const [listaPersonal] = await pool.query(sqlPersonal)
 
@@ -208,7 +208,7 @@ export class Vehiculo {
     insertar = async (datos, empresa) => {
         const sqlexisteusername =
             `SELECT placa from vehiculo where
-                placa = ${pool.escape(datos.placa)}`;
+                placa = ${pool.escape(datos.placa)} and eliminado = false`;
         const [rows] = await pool.query(sqlexisteusername)
         if (rows.length === 0) {
             await pool.query("INSERT INTO vehiculo SET  ?", datos)
@@ -247,11 +247,10 @@ export class Vehiculo {
     actualizar = async (datos) => {
         const sqlExists = `SELECT * FROM vehiculo WHERE 
             placa = ${pool.escape(datos.placa)} 
-            and id !=${pool.escape(datos.id)}`;
+            and id !=${pool.escape(datos.id)} and eliminado = false `;
         const [result] = await pool.query(sqlExists)
         if (result.length === 0) {
             const sql = `UPDATE vehiculo SET
-                idtipo = ${pool.escape(datos.idtipo)},
                 idusuario = ${pool.escape(datos.idusuario)},
                 placa = ${pool.escape(datos.placa)},
                 modelo = ${pool.escape(datos.modelo)},
@@ -261,6 +260,28 @@ export class Vehiculo {
             await pool.query(sql);
             return await this.ver(datos.id)
         } else return { existe: 1 }
+    }
+
+
+    // luego de reconfigirar vehiculo, debera volver a registrar los asientos
+    reConfigurar = async (datos) => {
+
+        const sql = `UPDATE vehiculo SET
+                idtipo = ${pool.escape(datos.idtipo)},
+                modificado = ${pool.escape(datos.modificado)},
+                usuario= ${pool.escape(datos.usuario)}
+                WHERE id = ${pool.escape(datos.idvehiculo)} and eliminado = false`;
+        const [res] = await pool.query(sql);
+        // console.log(res.affectedRows, 'numero de filas  del vehiculo afectados')
+        if (res.affectedRows > 0) {
+            const sql = `UPDATE asiento SET
+                eliminado = true,
+                modificado = ${pool.escape(datos.modificado)},
+                usuario= ${pool.escape(datos.usuario)}
+                WHERE idvehiculo = ${pool.escape(datos.idvehiculo)} and eliminado = false`;
+                await pool.query(sql);
+        }
+        return await this.ver(datos.idvehiculo)
     }
 
 
