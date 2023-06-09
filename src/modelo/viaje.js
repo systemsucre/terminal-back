@@ -8,11 +8,10 @@ export class Viaje {
     // este metodo lista solo los vehiculos de una empresa en especifo 
     listar = async (idempresa) => {
         const sql =
-            `select v.id,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado,
-            concat(u.nombre,' ', u.apellido1,' ',apellido2) as encargado, ti.tipo as tipo
+            `select v.id,
+             DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
             from viaje v
             inner join vehiculo ve on ve.id = v.idvehiculo
-            inner join usuario u on u.id = ve.idusuario
             inner join tipo ti on ti.id = ve.idtipo
             inner join ruta r on r.id = v.idruta
             inner join terminal t on t.id = r.origen 
@@ -28,15 +27,16 @@ export class Viaje {
     buscar = async (dato) => {
         // console.log('los datos han llegado', dato)
         const sql =
-            `select r.id, t.nombre as origen , te.nombre as destino, r.duracion, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora
-            from ruta r
-            inner join terminal t on r.origen = t.id
-            inner join terminal te on r.destino = te.id
-            inner join empresa e on e.id= r.idempresa 
-            where 
-            r.dia like '${dato.dato}%' 
-            and r.eliminado = false and r.idempresa = ${pool.escape(dato.empresa)}
-            ORDER by r.id DESC`;
+            `select v.id,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
+            from viaje v
+            inner join vehiculo ve on ve.id = v.idvehiculo
+            inner join tipo ti on ti.id = ve.idtipo
+            inner join ruta r on r.id = v.idruta
+            inner join terminal t on t.id = r.origen 
+            inner join terminal te on te.id = r.destino
+            where r.dia like '${dato.dato}%' 
+            and v.eliminado = false and r.idempresa = ${pool.escape(dato.empresa)}
+            ORDER by v.id DESC`;
         const [rows] = await pool.query(sql)
         return rows
     }
@@ -44,24 +44,28 @@ export class Viaje {
 
     listarSiguiente = async (id) => {
         const sql =
-            `select r.id, t.nombre as origen , te.nombre as destino, r.duracion, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora
-            from ruta r
-            inner join terminal t on r.origen = t.id
-            inner join terminal te on r.destino = te.id
-            inner join empresa e on e.id= r.idempresa 
-            where r.idempresa = ${pool.escape(id.idempresa)} and r.eliminado = false and r.id < ${pool.escape(id.id)} ORDER by r.id DESC limit 8`;
+            `select v.id,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
+            from viaje v
+            inner join vehiculo ve on ve.id = v.idvehiculo
+            inner join tipo ti on ti.id = ve.idtipo
+            inner join ruta r on r.id = v.idruta
+            inner join terminal t on t.id = r.origen 
+            inner join terminal te on te.id = r.destino
+            where r.idempresa = ${pool.escape(id.idempresa)} and v.eliminado = false and v.id < ${pool.escape(id.id)} ORDER by v.id DESC limit 8`;
         const [rows] = await pool.query(sql)
         return rows
     }
 
     listarAnterior = async (id) => {
         const sql =
-            `select r.id, t.nombre as origen , te.nombre as destino, r.duracion, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora
-            from ruta r
-            inner join terminal t on r.origen = t.id
-            inner join terminal te on r.destino = te.id
-            inner join empresa e on e.id= r.idempresa 
-            where idempresa = ${pool.escape(id.idempresa)} and r.eliminado = false and r.id > ${pool.escape(id.id)} limit 8`;
+            `select v.id,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
+            from viaje v
+            inner join vehiculo ve on ve.id = v.idvehiculo
+            inner join tipo ti on ti.id = ve.idtipo
+            inner join ruta r on r.id = v.idruta
+            inner join terminal t on t.id = r.origen 
+            inner join terminal te on te.id = r.destino
+            where r.idempresa = ${pool.escape(id.idempresa)} and v.eliminado = false and v.id > ${pool.escape(id.id)} limit 8`;
         const [rows] = await pool.query(sql)
         rows.reverse()
         return rows
