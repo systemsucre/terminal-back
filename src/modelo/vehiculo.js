@@ -8,40 +8,28 @@ export class Vehiculo {
     // este metodo lista solo los vehiculos de una empresa en especifo 
     listar = async (datos) => {
         const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo, v.eliminado
+            `select v.id, t.tipo, o.lugar, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
+            v.capacidad, v.placa, v.modelo, v.eliminado
             from vehiculo v 
             inner join usuario u on v.idusuario = u.id
-            inner join empresa e on u.idempresa = e.id
+            inner join oficina o on o.id = u.idoficina
+            inner join empresa e on e.id = o.idempresa
             inner join  tipo t on v.idtipo = t.id
             where v.eliminado = false and e.id= ${pool.escape(datos.empresa)} order by v.id desc LIMIT 8;`;
         const [rows] = await pool.query(sql)
         return rows
     }
-    listarReciclaje = async (datos) => {
-        const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo
-            from vehiculo v 
-            inner join usuario u on v.idusuario = u.id
-            inner join empresa e on u.idempresa = e.id
-            inner join  tipo t on v.idtipo = t.id
-            where v.eliminado = true and e.id= ${pool.escape(datos.empresa)} ORDER by v.id DESC LIMIT 8;`;
-        const [rows] = await pool.query(sql)
-        // console.log(rows, 'lista')
-        return rows
-    }
 
 
-    // los registros solo se pueden buscar desde el panel de la secretaria
     buscar = async (dato) => {
         // console.log('los datos han llegado', dato)
         const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo, v.eliminado
+            `select v.id, t.tipo,o.lugar,  concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
+            v.capacidad, v.placa, v.modelo, v.eliminado
             from vehiculo v 
             inner join usuario u on v.idusuario = u.id
-            inner join empresa e on u.idempresa = e.id
+            inner join oficina o on o.id = u.idoficina
+            inner join empresa e on e.id = o.idempresa
             inner join  tipo t on v.idtipo = t.id
             where (u.nombre like '${dato.dato}%' or
             v.placa like '${dato.dato}%' or
@@ -54,35 +42,17 @@ export class Vehiculo {
         return rows
     }
 
-    // los registros solo se pueden buscar desde el panel de la secretaria
 
-    buscarEliminado = async (dato) => {
-        // console.log('los datos han llegado', dato)    
-        const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo, v.eliminado
-            from vehiculo v 
-            inner join usuario u on v.idusuario = u.id
-            inner join empresa e on u.idempresa = e.id
-            inner join  tipo t on v.idtipo = t.id
-            where (u.nombre like '${dato.dato}%' or
-            v.placa like '${dato.dato}%' or
-            u.nombre like '${dato.dato}%' or
-            u.apellido1  like '${dato.dato}%' or
-            u.apellido2  like '${dato.dato}%') and v.eliminado = true and e.id = ${pool.escape(dato.empresa)}
-            ORDER by v.id DESC limit 8`;
-        const [rows] = await pool.query(sql)
-        return rows
-    }
 
 
     listarSiguiente = async (id) => {
         const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo, v.eliminado
+            `select v.id, t.tipo,o.lugar, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
+            v.capacidad, v.placa, v.modelo, v.eliminado
             from vehiculo v 
             inner join usuario u on v.idusuario = u.id
-            inner join empresa e on u.idempresa = e.id
+            inner join oficina o on o.id = u.idoficina
+            inner join empresa e on e.id = o.idempresa
             inner join  tipo t on v.idtipo = t.id
             where v.eliminado = false and e.id = ${pool.escape(id.empresa)}
             and v.id < ${pool.escape(id.id)} ORDER by v.id DESC limit 8`;
@@ -90,26 +60,13 @@ export class Vehiculo {
         return rows
     }
 
-    listarSiguienteEliminados = async (id) => {
-        const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo, v.eliminado
-            from vehiculo v 
-            inner join usuario u on v.idusuario = u.id
-            inner join empresa e on u.idempresa = e.id
-            inner join  tipo t on v.idtipo = t.id
-            where v.eliminado = true and e.id = ${pool.escape(id.empresa)}
-            and v.id < ${pool.escape(id.id)} ORDER by v.id DESC  limit 8`;
-        const [rows] = await pool.query(sql)
-        return rows
-    }
 
 
 
     listarAnterior = async (id) => {
         const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo, v.eliminado
+            `select v.id, t.tipo, o.lugar,  concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
+            v.capacidad, v.placa, v.modelo, v.eliminado
             from vehiculo v 
             inner join usuario u on v.idusuario = u.id
             inner join empresa e on u.idempresa = e.id
@@ -121,35 +78,19 @@ export class Vehiculo {
         return rows
     }
 
-    listarAnteriorEliminados = async (id) => {
-        const sql =
-            `select v.id, t.tipo, e.nombre as empresa, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as encargado,
-            t.capacidad, v.placa, v.modelo, v.eliminado
-            from vehiculo v 
-            inner join usuario u on v.idusuario = u.id
-            inner join empresa e on u.idempresa = e.id
-            inner join  tipo t on v.idtipo = t.id
-            where v.eliminado = true and e.id = ${pool.escape(id.empresa)}
-            and v.id > ${pool.escape(id.id)} limit 8`;
-        const [rows] = await pool.query(sql)
-        rows.reverse()
-        return rows
-    }
-
-
 
     // MUESTRA EL REGISTRO de los asientos del vehiculo
     ver = async (id) => {
-        const sqlVehiculo = `select v.id, t.id as idtipo, t.numero,t.tipo,  v.idusuario, v.placa,
-            v.modelo,t.capacidad
+        const sqlVehiculo = `select v.id, t.id as idtipo, t.numero, t.tipo,  v.idusuario, v.placa,
+            v.modelo,v.capacidad,v.filas, v.columnas
             from vehiculo v 
             inner join tipo t on t.id = v.idtipo
             where v.id = ${pool.escape(id)}`
 
         const [vehiculo] = await pool.query(sqlVehiculo)
-        const sqlAsiento = `select  a.id as idasiento, a.numero as numeroAsiento, 
-            au.id as idubicaicon, au.ubicacion, v.placa, t.tipo, t.numero, 
-            t.capacidad
+        const sqlAsiento = `select  a.id as idasiento, a.numero as numeroAsiento,  
+            au.id as idubicaicon, au.ubicacion, v.placa, t.tipo, t.numero, x,y,
+            v.capacidad
             from vehiculo v 
             inner join tipo t on t.id = v.idtipo
             left join asiento a on v.id = a.idvehiculo
@@ -172,32 +113,21 @@ export class Vehiculo {
         await pool.query(sql)
         return await this.listar(datos)
     }
-    // el vehiculo puede ser retaurado desde la secretaria y el usuario
-    restaurar = async (datos) => {
-        const sql = `update vehiculo set eliminado = false, 
-        modificado = ${pool.escape(datos.modificado)} , usuario = ${pool.escape(datos.usuario)}
-        WHERE id =  ${pool.escape(datos.id)}`;
-        await pool.query(sql)
-        return await this.listar(datos)
-    }
 
 
 
-    // listar los diferentes tipo de vehiculos para permitir registrar o modificar los registros de vehiculos, ej: bus, buscama, miniban etc, 
-    // tambien se obtienen las capacidades del vehiculo inferior y superior
-
-    // lista los usuarios que pertenecen a esa empresa con rol numero = 3 (chofer)
     listarTipo = async (idempresa) => {
         const sqlPersonal =
             `SELECT u.id as id, concat(u.nombre,' ',u.apellido1,' ',u.apellido2) as nombre  from usuario u
-            inner join empresa e on e.id = u.idempresa
+            inner join oficina o on o.id = u.idoficina
+            inner join empresa e on e.id = o.idempresa
             inner join rol r on r.id = u.idrol
             where e.id = ${pool.escape(idempresa)} and r.numero = 3 and u.eliminado = false
               `;
         const [listaPersonal] = await pool.query(sqlPersonal)
 
         const sqlTipo =
-            `SELECT id, tipo as nombre, capacidad from tipo`;
+            `SELECT id, tipo as nombre from tipo`;
         const [listaTipo] = await pool.query(sqlTipo)
 
         return [listaPersonal, listaTipo]
@@ -207,8 +137,12 @@ export class Vehiculo {
     // esta operacion esta permitido solo para el rol secretaria, la placa es un atributo único
     insertar = async (datos, empresa) => {
         const sqlexisteusername =
-            `SELECT placa from vehiculo where
-                placa = ${pool.escape(datos.placa)} and eliminado = false`;
+            `SELECT v.placa from vehiculo v
+            inner join usuario u on o.id = v.idusuario
+            inner join oficina o on o.id = u.idoficina
+            inner join empresa e on e.id = o.idempresa
+            where
+                v.placa = ${pool.escape(datos.placa)} and e.id = ${pool.escape(empresa)} v.eliminado = false`;
         const [rows] = await pool.query(sqlexisteusername)
         if (rows.length === 0) {
             await pool.query("INSERT INTO vehiculo SET  ?", datos)
@@ -245,15 +179,22 @@ export class Vehiculo {
     // la actualizacion de este registro se realiza desde el usuario y la secretaria
 
     actualizar = async (datos) => {
-        const sqlExists = `SELECT * FROM vehiculo WHERE 
-            placa = ${pool.escape(datos.placa)} 
-            and id !=${pool.escape(datos.id)} and eliminado = false `;
+        const sqlExists = `SELECT * FROM vehiculo v
+            inner join usuario u on o.id = v.idusuario
+            inner join oficina o on o.id = u.idoficina
+            inner join empresa e on e.id = o.idempresa
+            WHERE 
+            v.placa = ${pool.escape(datos.placa)} and e.id = ${pool.escape(datos.empresa)}
+            and v.id !=${pool.escape(datos.id)} and v.eliminado = false `;
         const [result] = await pool.query(sqlExists)
         if (result.length === 0) {
             const sql = `UPDATE vehiculo SET
                 idusuario = ${pool.escape(datos.idusuario)},
                 placa = ${pool.escape(datos.placa)},
                 modelo = ${pool.escape(datos.modelo)},
+                capacidad = ${pool.escape(datos.capacidad)},
+                filas = ${pool.escape(datos.fil)},
+                columnas = ${pool.escape(datos.col)},
                 modificado = ${pool.escape(datos.modificado)},
                 usuario= ${pool.escape(datos.usuario)}
                 WHERE id = ${pool.escape(datos.id)} and eliminado = false`;
@@ -268,6 +209,8 @@ export class Vehiculo {
 
         const sql = `UPDATE vehiculo SET
                 idtipo = ${pool.escape(datos.idtipo)},
+                filas = ${pool.escape(datos.fil)},
+                columnas = ${pool.escape(datos.col)},
                 modificado = ${pool.escape(datos.modificado)},
                 usuario= ${pool.escape(datos.usuario)}
                 WHERE id = ${pool.escape(datos.idvehiculo)} and eliminado = false`;
@@ -279,12 +222,9 @@ export class Vehiculo {
                 modificado = ${pool.escape(datos.modificado)},
                 usuario= ${pool.escape(datos.usuario)}
                 WHERE idvehiculo = ${pool.escape(datos.idvehiculo)} and eliminado = false`;
-                await pool.query(sql);
+            await pool.query(sql);
         }
         return await this.ver(datos.idvehiculo)
     }
-
-
-
 
 }

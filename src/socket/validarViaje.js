@@ -28,25 +28,57 @@ const INPUT = {
     NUMEROS_P: /^[0-9]{1,20}$/,   // números enteros positivos 
     CORREO: /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/,
     IMG: /.jpg|.jpeg|.png/i,
-    DATETIME: /^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/
+    DATETIME: /^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/,
+    COSTO: /^[0-9]{1,20}$/,  
 }
 
-export const insertarViaje = async (data) => {
+export const insertarViaje = async (data) => { 
 
-    if (INPUT.ID.test(data.idruta) && INPUT.ID.test(data.idvehiculo) && INPUT.FECHA.test(data.fecha) && INPUT.DATETIME.test(data.creado)) return true 
+    if (INPUT.ID.test(data.idruta) && INPUT.ID.test(data.idvehiculo) && INPUT.ID.test(data.carril) && INPUT.FECHA.test(data.fecha) && INPUT.DATETIME.test(data.creado) ) return true 
     else return false
 
 }
 
 export const actualizarViaje = async (data) => {
-
-    if (INPUT.ID.test(data.id) && INPUT.ID.test(data.idruta) && INPUT.ID.test(data.idvehiculo) && INPUT.FECHA.test(data.fecha) && INPUT.DATETIME.test(data.modificado))  return true 
+    if (INPUT.ID.test(data.id) && INPUT.ID.test(data.idruta) && INPUT.ID.test(data.carril) && INPUT.ID.test(data.idvehiculo) && INPUT.FECHA.test(data.fecha) && INPUT.DATETIME.test(data.modificado))  return true 
     else return false
-
 }
 
 export const eliminarViaje = async (data) => {
     if (INPUT.ID.test(data.id) && INPUT.DATETIME.test(data.fecha))  return true 
+    else return false
+
+}
+
+
+// OPERACIONES CON PASAAJES
+export const insertarPasaje = async (data) => { 
+    // console.log(data)
+    if (INPUT.ID.test(data.idvehiculo) && INPUT.ID.test(data.idviaje) &&
+     INPUT.ID.test(data.idasiento) && INPUT.DATETIME.test(data.creado) &&
+    INPUT.FECHA.test(data.fecha) &&INPUT.HORA.test(data.hora) &&  
+    INPUT.CI.test(data.ci) && INPUT.NOMBRE_PERSONA.test(data.nombre) &&
+    INPUT.NOMBRE_PERSONA.test(data.apellido1) && INPUT.NOMBRE_PERSONA.test(data.apellido2)&&
+    INPUT.TELEFONO.test(data.telefono) && INPUT.INPUT_BUSCAR.test(data.direccion)) 
+        return true 
+    else return false
+
+}
+export const actualizarPasaje = async (data) => { 
+    console.log(data)
+    if ( INPUT.ID.test(data.id) && INPUT.ID.test(data.idvehiculo) && INPUT.ID.test(data.idviaje) &&
+     INPUT.ID.test(data.idasiento) && INPUT.DATETIME.test(data.modificado) &&
+    INPUT.CI.test(data.ci) && INPUT.NOMBRE_PERSONA.test(data.nombre) &&
+    INPUT.NOMBRE_PERSONA.test(data.apellido1) && INPUT.NOMBRE_PERSONA.test(data.apellido2)&&
+    INPUT.TELEFONO.test(data.telefono) && INPUT.INPUT_BUSCAR.test(data.direccion)) 
+        return true 
+    else return false
+
+}
+export const eliminarPasaje = async (data) => { 
+    console.log(data)
+    if ( INPUT.ID.test(data.id) && INPUT.DATETIME.test(data.modificado) && INPUT.ID.test(data.idvehiculo) && INPUT.ID.test(data.idviaje)) 
+        return true 
     else return false
 
 }

@@ -76,6 +76,94 @@ export const actualizar = [
 ]
 
 
+export const insertarA = [
+    check('idoficina')
+        .isLength({ min: 1 })
+        .exists().isNumeric(),
+    check('idrol')
+        .isLength({ min: 1 })
+        .exists().isNumeric(),
+    check('username')
+        .isLength({ min: 4 })
+        .exists(),
+    check('xyz')
+        .isLength({ min: 4 })
+        .exists(),
+    check('ci')
+        .isLength({ min: 5, max: 15 })
+        .exists(),
+    check('nombre')
+        .isLength({ min: 4 })
+        .exists(),
+    check('apellido1')
+        .isLength({ min: 4 })
+        .exists(),
+    check('apellido2')
+        .isLength({ min: 4 })
+        .exists(),
+    check('celular')
+        .exists()
+        .isNumeric()
+        .isLength({ min: 4, max: 25 }),
+    check('direccion')
+        .exists()
+        .matches(/^[()/a-zA-Z Ññ0-9_-]{1,400}$/),
+    check('creado')
+        .exists()
+        .matches(/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/),
+
+    (req, res, next) => {
+        validaciones(req, res, next)
+    }
+]
+
+export const actualizarA = [
+    check('id')
+        .isLength({ min: 1 })
+        .exists().isNumeric(),
+    check('idoficina')
+        .isLength({ min: 1 })
+        .exists().isNumeric(),
+    check('idrol')
+        .isLength({ min: 1 })
+        .exists().isNumeric(),
+
+    check('ci')
+        .isLength({ min: 5, max: 15 })
+        .exists(),
+    check('nombre')
+        .isLength({ min: 4 })
+        .exists(),
+    check('apellido1')
+        .isLength({ min: 4 })
+        .exists(),
+    check('apellido2')
+        .isLength({ min: 4 })
+        .exists(),
+    check('celular')
+        .exists()
+        .isNumeric()
+        .isLength({ min: 4, max: 25 }),
+    check('direccion')
+        .exists()
+        .matches(/^[()/a-zA-Z Ññ0-9_-]{1,400}$/),
+    check('modificado')
+        .exists()
+        .matches(/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/),
+
+    (req, res, next) => {
+        validaciones(req, res, next)
+    }
+]
+
+
+
+
+
+
+
+
+
 export const actualizarMiPerfil = [
 
     check('nombre')

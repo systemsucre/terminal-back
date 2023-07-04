@@ -106,9 +106,9 @@ rutas.post("/listarrutas", async (req, res) => {
 rutas.post("/registrar", insertar, async (req, res) => {
 
     try {
-        const { idruta, idvehiculo, fecha, creado, usuario } = req.body
+        const { idruta, idvehiculo, fecha, costo, creado, usuario } = req.body
 
-        const datos = { idruta, idvehiculo, fecha, creado, usuario }
+        const datos = { idruta, idvehiculo, fecha, costo, creado, usuario }
         const resultado = await viaje.insertar(datos) 
 
         if (resultado?.existe === 1)
@@ -129,9 +129,9 @@ rutas.post("/registrar", insertar, async (req, res) => {
 rutas.post("/actualizar", actualizar, async (req, res) => {
     try {
 
-        const { id, idruta, idvehiculo, fecha, creado, modificado } = req.body
+        const { id, idruta, idvehiculo, fecha, costo, creado, modificado } = req.body
 
-        const datos = { id, idruta, idvehiculo, fecha, creado, modificado }
+        const datos = { id, idruta, idvehiculo, fecha, costo, creado, modificado }
         const resultado = await viaje.actualizar(datos)
 
         if (resultado?.existe === 1)

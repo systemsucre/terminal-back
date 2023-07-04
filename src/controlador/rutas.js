@@ -26,6 +26,7 @@ rutas.post("/all", async (req, res) => {
 
 
 rutas.post("/ver", async (req, res) => {
+    console.log(req.body)
     try {
         const resultado = await ruta.ver(req.body.id)
         return res.json({ data: resultado, ok: true })
@@ -47,7 +48,7 @@ rutas.post("/ver", async (req, res) => {
 rutas.post("/siguiente", id, async (req, res) => {
 
     const { id, empresa } = req.body
-    const datos = { id, idempresa:empresa }
+    const datos = { id, idempresa: empresa }
     try {
         const resultado = await ruta.listarSiguiente(datos)
         if (resultado.length > 0)
@@ -101,9 +102,9 @@ rutas.post("/lugares", async (req, res) => {
 rutas.post("/registrar", insertar, async (req, res) => {
 
     try {
-        const { origen,destino, lugarorigen, lugardestino, duracion, empresa, dia, hora, creado, usuario } = req.body
+        const { origen, destino, lugarorigen, lugardestino, duracion, empresa, dia, hora, costo, creado, usuario } = req.body
 
-        const datos = { origen,destino, lugarorigen, lugardestino, duracion, idempresa: empresa, dia, hora, creado, usuario }
+        const datos = { origen, destino, lugarorigen, lugardestino, duracion, idempresa: empresa, dia, hora,costo,  creado, usuario }
         const resultado = await ruta.insertar(datos)
 
         if (resultado?.existe === 1)
@@ -124,9 +125,9 @@ rutas.post("/registrar", insertar, async (req, res) => {
 rutas.post("/actualizar", actualizar, async (req, res) => {
     try {
 
-        const { id, origen, destino,lugarorigen, lugardestino, duracion, empresa, dia, hora, creado, usuario } = req.body
+        const { id, origen, destino, lugarorigen, lugardestino, duracion, empresa, dia, hora, costo,  creado, usuario } = req.body
 
-        const datos = { id, origen, destino, lugarorigen, lugardestino, duracion, idempresa:empresa, dia, hora, creado, usuario }
+        const datos = { id, origen, destino, lugarorigen, lugardestino, duracion, idempresa: empresa, dia, hora, costo,  creado, usuario }
         const resultado = await ruta.actualizar(datos)
 
         if (resultado?.existe === 1)

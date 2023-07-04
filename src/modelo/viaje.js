@@ -8,8 +8,10 @@ export class Viaje {
     // este metodo lista solo los vehiculos de una empresa en especifo 
     listar = async (idempresa) => {
         const sql =
-            `select v.id,
-             DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
+            `select v.id, ve.id as idvehiculo, 
+             DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo,
+             r.lugarorigen, r.lugardestino, v.carril,v.costo as costov, r.costo as costor 
+
             from viaje v
             inner join vehiculo ve on ve.id = v.idvehiculo
             inner join tipo ti on ti.id = ve.idtipo
@@ -27,7 +29,8 @@ export class Viaje {
     buscar = async (dato) => {
         // console.log('los datos han llegado', dato)
         const sql =
-            `select v.id,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
+            `select v.id , ve.id as idvehiculo, DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo,
+            r.lugarorigen, r.lugardestino, v.carril,v.costo as costov, r.costo as costor 
             from viaje v
             inner join vehiculo ve on ve.id = v.idvehiculo
             inner join tipo ti on ti.id = ve.idtipo
@@ -44,7 +47,8 @@ export class Viaje {
 
     listarSiguiente = async (id) => {
         const sql =
-            `select v.id,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
+            `select v.id, ve.id as idvehiculo,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo,
+            r.lugarorigen, r.lugardestino, v.carril,v.costo as costov, r.costo as costor 
             from viaje v
             inner join vehiculo ve on ve.id = v.idvehiculo
             inner join tipo ti on ti.id = ve.idtipo
@@ -58,7 +62,8 @@ export class Viaje {
 
     listarAnterior = async (id) => {
         const sql =
-            `select v.id,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo
+            `select v.id, ve.id as idvehiculo,  DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha, t.nombre as origen , te.nombre as destino, r.dia, DATE_FORMAT(r.hora, "%H:%m") as hora, v.estado, ti.tipo as tipo.
+            r.lugarorigen, r.lugardestino, v.carril,v.costo as costov, r.costo as costor 
             from viaje v
             inner join vehiculo ve on ve.id = v.idvehiculo
             inner join tipo ti on ti.id = ve.idtipo
@@ -76,13 +81,13 @@ export class Viaje {
     ver = async (id) => {
         const sqlRuta = `select 
                         v.id, DATE_FORMAT(v.fecha,"%Y-%m-%d") as fecha , t.nombre as origen,  te.nombre as destino, v.estado,
-                        r.id as idruta, r.lugarorigen, r.lugardestino, r.dia, DATE_FORMAT(r.hora, "%H:%m") AS hora, r.duracion, 
+                        r.id as idruta, r.lugarorigen, r.lugardestino, r.dia, DATE_FORMAT(r.hora, "%H:%m") AS hora, r.duracion, r.costo as costor, v.costo as costov, v.carril,
                         concat(u.nombre,' ',u.apellido1,' ', u.apellido2) as editor, DATE_FORMAT(v.creado,"%Y-%m-%d") as creado,  DATE_FORMAT(v.modificado,"%Y-%m-%d") as modificado,
                         ve.id as idvehiculo, ti.tipo as vehiculo, ve.placa,  concat(us.nombre,' ',us.apellido1,' ', us.apellido2) as encargado
                         from viaje v
                         inner join vehiculo ve on ve.id = v.idvehiculo 
                         inner join tipo ti on ti.id = ve.idtipo
-                        inner join usuario us on us.id= ve.idusuario
+                        inner join usuario us on us.id= ve.idusuario  
                         inner join  ruta r on r.id = v.idruta
                         inner join terminal t on t.id = r.origen
                         inner join terminal te on te.id = r.destino
@@ -107,16 +112,14 @@ export class Viaje {
     }
 
 
-    // listar los diferentes tipo de vehiculos para permitir registrar o modificar los registros de vehiculos, ej: bus, buscama, miniban etc, 
-    // tambien se obtienen las capacidades del vehiculo inferior y superior
 
-    // lista los usuarios que pertenecen a esa empresa con rol numero = 3 (chofer)
     listarRutas = async (empresa) => {
         const sqlVehiculo =
             `SELECT distinct(v.id), concat(u.nombre,' ',u.apellido1,' ',u.apellido2,' -> ',t.tipo ) as nombre
              from ruta r 
              inner join empresa e on e.id = r.idempresa
-             inner join usuario u on e.id = u.idempresa
+             inner join oficina o on e.id = o.idempresa
+             inner join usuario u on o.id = u.idoficina
              inner join vehiculo v on u.id = v.idusuario 
              inner join tipo t on t.id = v.idtipo
              where r.idempresa = ${pool.escape(empresa)} and r.eliminado = false`;
@@ -161,6 +164,8 @@ export class Viaje {
                 idruta = ${pool.escape(datos.idruta)},
                 idvehiculo = ${pool.escape(datos.idvehiculo)},
                 fecha = ${pool.escape(datos.fecha)},
+                carril = ${pool.escape(datos.carril)},
+                costo = ${pool.escape(datos.costo)},
                 modificado = ${pool.escape(datos.modificado)},
                 usuario= ${pool.escape(datos.usuario)}
                 WHERE id = ${pool.escape(datos.id)} and eliminado = false`;

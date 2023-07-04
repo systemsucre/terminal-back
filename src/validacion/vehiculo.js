@@ -9,13 +9,21 @@ export const insertar = [
     check('idusuario')
         .exists()
         .matches(/^\d{1,10}$/),
+    check('capacidad')
+        .exists()
+        .matches(/^[0-9]{1,20}$/),
     check('placa')
         .exists()
         .matches(/^\d{3,5}[-][A-Z]{3}?$/),
     check('modelo')
         .exists()
         .matches(/^[0-9]{1,20}$/),
-
+    check('fil')
+        .exists()
+        .matches(/^\d{1,10}$/),
+    check('col')
+        .exists()
+        .matches(/^\d{1,10}$/),
     check('creado')
         .exists()
         .matches(/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/),
@@ -54,12 +62,21 @@ export const actualizar = [
     check('idusuario')
         .exists()
         .matches(/^\d{1,10}$/),
+    check('capacidad')
+        .exists()
+        .matches(/^[0-9]{1,20}$/),
     check('placa')
         .exists()
         .matches(/^\d{3,5}[-][A-Z]{3}?$/),
     check('modelo')
         .exists()
         .matches(/^[0-9]{1,20}$/),
+    check('fil')
+        .exists()
+        .matches(/^\d{1,10}$/),
+    check('col')
+        .exists()
+        .matches(/^\d{1,10}$/),
     check('modificado')
         .exists()
         .matches(/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/),
@@ -72,6 +89,12 @@ export const reConfigurar = [
         .exists()
         .matches(/^\d{1,10}$/),
     check('idtipo')
+        .exists()
+        .matches(/^\d{1,10}$/),
+    check('fil')
+        .exists()
+        .matches(/^\d{1,10}$/),
+    check('col')
         .exists()
         .matches(/^\d{1,10}$/),
     check('modificado')

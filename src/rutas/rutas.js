@@ -6,11 +6,12 @@ import jwt from 'jsonwebtoken'
 // Admiministrador
 
 import usuario from "../controlador/usuario.js";
+import usuarioAdmin from "../controlador/usuarioadmin.js";
 import vehiculo from "../controlador/vehiculo.js";
 import asiento from "../controlador/asiento.js";
 import ruta from "../controlador/rutas.js";
 import viaje from "../controlador/viaje.js";
-
+import pasaje from '../controlador/pasaje.js'
 
 
 
@@ -27,8 +28,11 @@ rutas.get('/', async (req, res) => {
     console.log("datos de la solicitud: ", req.query)
 
     try {
-        const sql = ` SELECT u.id, u.nombre, u.apellido1, u.apellido2, u.username, rol.numero, e.id as empresa
-        from usuario u inner join rol on u.idrol = rol.id inner join empresa e on e.id = u.idempresa
+        const sql = ` SELECT u.id, u.nombre, u.apellido1, u.apellido2, u.username, rol.numero, e.id as empresa, o.id as oficina
+        from usuario u 
+        inner join rol on u.idrol = rol.id 
+        inner join oficina o on o.id = u.idoficina 
+        inner join empresa e on e.id = o.idempresa  
         WHERE u.username = ${pool.escape(req.query.user)} and u.pass = ${pool.escape(req.query.pass)} and u.eliminado = 0`;
 
         // console.log(await pool.query(sql), 'resultados de la consulta inicial')
@@ -52,9 +56,11 @@ rutas.get('/', async (req, res) => {
             const idusuario = result[0].id
             const numero = result[0].numero
             const empresa = result[0].empresa
+            const oficina = result[0].oficina
             const datos = {
                 idusuario,
                 empresa,
+                oficina,
                 rol: numero,
                 fecha,
                 token
@@ -67,11 +73,13 @@ rutas.get('/', async (req, res) => {
                 console.log('dentro del bloquesss', req.query.user, req.query.pass)
 
                 const sqlInfo = `SELECT UPPER(r.rol) as rol, r.numero as numRol,
-                    u.username, concat(UPPER(left(u.nombre,1)),LOWER(SUBSTRING(u.nombre,2))) as nombre, 
-                    concat(UPPER(left(u.apellido1,1)),LOWER(SUBSTRING(u.apellido1,2))) as apellido, e.id as empresa
+                    u.username, concat(UPPER(left(u.nombre,1)),LOWER(SUBSTRING(u.nombre,2))) as nombre, e.nombre as nombreempresa, o.telefono, e.origen, o.direcion, o.lugar,
+                    concat(UPPER(left(u.apellido1,1)),LOWER(SUBSTRING(u.apellido1,2))) as apellido, e.id as empresa, 
+                    o.id as oficina
                     from usuario u 
                     inner join rol r on u.idrol = r.id
-                    inner join empresa e on e.id = u.idempresa
+                    inner join oficina o on o.id = u.idoficina
+                    inner join empresa e on e.id = o.idempresa
                     where u.username = ${pool.escape(req.query.user)} and u.pass = ${pool.escape(req.query.pass)} `;
                 const [info] = await pool.query(sqlInfo)
                 console.log("datos de la consulta: ", info[0])
@@ -83,7 +91,12 @@ rutas.get('/', async (req, res) => {
                     'apellido': info[0].apellido,
                     'rol': info[0].rol,
                     'numRol': info[0].numRol,
-                    "minuto":info[0].empresa,
+                    'oficina': info[0].lugar,
+                    "minuto": info[0].empresa,
+                    "empresa": info[0].nombreempresa,
+                    "telefono": info[0].telefono,
+                    "origen": info[0].origen,
+                    "direccion": info[0].direcion,
                     ok: true,
                     msg: 'Acceso correcto'
                 })
@@ -105,7 +118,6 @@ rutas.get('/', async (req, res) => {
 
 rutas.post('/logout', (req, res) => {
     const sql = `delete from sesion where token = ${pool.escape(req.body.token)} `
-    console.log(sql, 'cadena sql')
     pool.query(sql)
 })
 
@@ -136,14 +148,14 @@ verificacion.use((req, res, next) => {
                 }
 
                 // console.log('pasa la verificacion del token', bearetoken)
-                const sql = `SELECT idusuario,rol, empresa from sesion 
+                const sql = `SELECT idusuario,rol, empresa, oficina from sesion 
                 where token  = ${pool.escape(bearetoken)}`;
                 const [result] = await pool.query(sql)
-                // console.log(result)
                 if (result.length > 0) {
                     req.body.usuario = await result[0].idusuario
                     req.body.rol = await result[0].rol
                     req.body.empresa = await result[0].empresa
+                    req.body.oficina = await result[0].oficina
                     next()
                 }
                 else {
@@ -161,14 +173,13 @@ verificacion.use((req, res, next) => {
     }
 })
 
-const rolesAdmin = (req, res, next) => {
+const admin_ = (req, res, next) => {
     if (parseInt(req.body.rol) === 1) {
         next()
-        // console.log('pasa por aqui')
     }
 }
 
-const rolesAdminUser = (req, res, next) => {
+const secretaria = (req, res, next) => {
     if (parseInt(req.body.rol) === 2) {
         next()
         // console.log('pasa por aqui')
@@ -176,11 +187,16 @@ const rolesAdminUser = (req, res, next) => {
 }
 
 
-rutas.use("/usuario", verificacion, rolesAdminUser, usuario)
-rutas.use("/vehiculo", verificacion, rolesAdminUser, vehiculo)
-rutas.use("/asiento", verificacion, rolesAdminUser, asiento)
-rutas.use("/ruta", verificacion, rolesAdminUser, ruta)
-rutas.use("/viaje", verificacion, rolesAdminUser, viaje)
+rutas.use("/usuarioadmin", verificacion, admin_, usuarioAdmin)
+
+
+
+rutas.use("/usuario", verificacion, secretaria, usuario)
+rutas.use("/vehiculo", verificacion, secretaria, vehiculo)
+rutas.use("/asiento", verificacion, secretaria, asiento)
+rutas.use("/ruta", verificacion, secretaria, ruta)
+rutas.use("/viaje", verificacion, secretaria, viaje)
+rutas.use("/pasaje", verificacion, secretaria, pasaje)
 
 
 

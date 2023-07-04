@@ -1,18 +1,20 @@
 import { Router } from "express"
-import { Usuario } from "../modelo/usuario.js"
-import { eliminar, buscar, siguiente, insertar,actualizar, recet } from '../validacion/usuario.js'
+import { UsuarioEmpresa } from "../modelo/usuarioadmin.js"
+import { eliminar, buscar, siguiente, insertarA,actualizarA, recet } from '../validacion/usuario.js'
 
 
 
 const rutas = Router()
-const usuarios = new Usuario()
+const usuarios = new UsuarioEmpresa()
 
 
 rutas.post("/all", async (req, res) => {
-    const { usuario, oficina} = req.body
-    const datos ={usuario, oficina}
+    console.log(req.body, 'controlller list data users')
+    const {  empresa} = req.body
+    const datos ={empresa}
     try {
         const resultado = await usuarios.listar(datos)
+        console.log(resultado)
 
         return res.json({ data: resultado, ok: true })
     } catch (error) {
@@ -23,6 +25,7 @@ rutas.post("/all", async (req, res) => {
 
 
 rutas.post("/recet", recet, async (req, res) => {
+    console.log(req.body, 'recetear contraseña')
     const { pass1, id, usuario, fecha } = req.body
     const datos = { pass1, id, usuario, fecha }
     try {
@@ -46,9 +49,10 @@ rutas.post("/ver", async (req, res) => {
     }
 })
 
-rutas.post("/rol", async (req, res) => {
+rutas.post("/oficina", async (req, res) => {
+
     try {
-        const resultado = await usuarios.listarRolSecretaria()
+        const resultado = await usuarios.oficina(req.body.empresa)
         return res.json(resultado)
     } catch (error) {
         return res.status(500).send(error)
@@ -56,11 +60,12 @@ rutas.post("/rol", async (req, res) => {
 })
 
 rutas.post("/buscar", buscar, async (req, res) => {
-    const { dato, usuario , oficina} = req.body
-    const datos = { dato, usuario, oficina }
+    // console.log(req.body)
+    const { dato, empresa} = req.body
+    const datos = { dato, usuario, empresa }
     try {
         const resultado = await usuarios.buscar(datos)
-        return res.json({ data: resultado, ok: true })
+        return res.send({ data: resultado, ok: true })
     } catch (error) {
         console.log(error)
         return res.json({ ok: false, msg: 'Error en el servidor' })
@@ -70,11 +75,12 @@ rutas.post("/buscar", buscar, async (req, res) => {
 
 
 rutas.post("/eliminar", eliminar, async (req, res) => {
+    console.log(req.body)
     try {
 
-        const { id, fecha, usuario, oficina } = req.body;
+        const { id, fecha, usuario, empresa } = req.body;
         const datos = {
-            id, modificado: fecha, usuario, oficina
+            id, modificado: fecha, usuario, empresa
         }
         const resultado = await usuarios.eliminar(datos)
         return res.json({ data: resultado, ok: true, msg: 'El usuario se ha eliminado exitosamente' })
@@ -88,8 +94,8 @@ rutas.post("/eliminar", eliminar, async (req, res) => {
 
 rutas.post("/next", siguiente, async (req, res) => {
 
-    const { id, usuario, oficina } = req.body
-    const datos = { id, usuario, oficina }
+    const { id, empresa } = req.body
+    const datos = { id,  empresa }
     try {
         const resultado = await usuarios.listarSiguiente(datos)
         if (resultado.length > 0)
@@ -105,8 +111,8 @@ rutas.post("/next", siguiente, async (req, res) => {
 
 
 rutas.post("/anterior", siguiente, async (req, res) => {
-    const { id, usuario, oficina} = req.body
-    const datos = { id, usuario, oficina }
+    const { id, empresa} = req.body
+    const datos = { id,  empresa }
     try {
         const resultado = await usuarios.listarAnterior(datos)
         if (resultado.length > 0)
@@ -121,16 +127,15 @@ rutas.post("/anterior", siguiente, async (req, res) => {
 })
 
 
-rutas.post("/registrar", insertar, async (req, res) => {
+rutas.post("/registrar", insertarA, async (req, res) => {
 
-    console.log('datos: ', req.body)
     try {
 
-        const { oficina,idrol, username, xyz, ci, nombre, apellido1,
-            apellido2, celular, direccion, creado, usuario } = req.body
+        const { idoficina,idrol, username, xyz, ci, nombre, apellido1,
+            apellido2, celular, direccion, creado, usuario, empresa } = req.body
 
         const datos = {
-            idoficina:oficina,
+            idoficina:idoficina,
             idrol,
             username,
             pass: xyz,
@@ -144,7 +149,7 @@ rutas.post("/registrar", insertar, async (req, res) => {
             usuario
         }
 
-        const resultado = await usuarios.insertarSecretaria(datos)
+        const resultado = await usuarios.insertarSecretaria(datos, empresa)
 
         if (resultado.existe === 1)
             return res.json({ ok: false, msg: 'Este usuario ya esta registrado' })
@@ -160,17 +165,18 @@ rutas.post("/registrar", insertar, async (req, res) => {
 })
 
 
-rutas.post("/actualizar", actualizar, async (req, res) => {
+rutas.post("/actualizar", actualizarA, async (req, res) => {
 
     console.log('datos: ', req.body)
     try {
 
-        const {id, idrol,  ci, nombre, apellido1,
+        const {id, idoficina, ci, nombre, apellido1,empresa,
             apellido2, celular, direccion, modificado, usuario } = req.body
 
         const datos = {
             id,
-            idrol,
+            empresa,
+            idoficina,
             ci,
             nombre,
             apellido1,

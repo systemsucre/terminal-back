@@ -67,13 +67,13 @@ export class Ruta {
     // MUESTRA EL REGISTRO de los asientos del vehiculo
     ver = async (id) => {
         const sqlRuta = `select r.id, t.id as idorigen, t.nombre as origen, te.id as iddestino, te.nombre as destino,
-                        r.lugarorigen, r.lugardestino, r.dia, DATE_FORMAT(r.hora, "%H:%m") AS hora, r.duracion, 
+                        r.lugarorigen, r.lugardestino, r.dia, DATE_FORMAT(r.hora, "%H:%m") AS hora, r.duracion, r.costo, 
                         concat(u.nombre,' ',u.apellido1,' ', u.apellido2) as editor, DATE_FORMAT(r.creado,"%Y-%m-%d") as creado,  DATE_FORMAT(r.modificado,"%Y-%m-%d") as modificado
                         from ruta r 
                         inner join terminal t on t.id = r.origen
                         inner join terminal te on te.id = r.destino
                         inner join empresa e on e.id = r.idempresa
-                        inner join usuario u on u.id = r.usuario
+                        left join usuario u on u.id = r.usuario
                         where r.id = ${pool.escape(id)}`
         const [ruta] = await pool.query(sqlRuta)
 
@@ -144,6 +144,7 @@ export class Ruta {
                 duracion = ${pool.escape(datos.duracion)},
                 dia = ${pool.escape(datos.dia)},
                 hora = ${pool.escape(datos.hora)},
+                costo = ${pool.escape(datos.costo)},
                 modificado = ${pool.escape(datos.modificado)},
                 usuario= ${pool.escape(datos.usuario)}
                 WHERE id = ${pool.escape(datos.id)} and eliminado = false`;

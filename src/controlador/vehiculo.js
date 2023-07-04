@@ -1,7 +1,6 @@
 import { Router } from "express"
 import { Vehiculo } from "../modelo/vehiculo.js"
-import { insertar, actualizar, eliminar, restaurar,reConfigurar, buscar, id } from '../validacion/vehiculo.js'
-import pool from '../modelo/bdConfig.js'
+import { insertar, actualizar, eliminar, restaurar, reConfigurar, buscar, id } from '../validacion/vehiculo.js'
 
 
 
@@ -9,7 +8,6 @@ const rutas = Router()
 const vehiculo = new Vehiculo()
 
 
-// listar los registros pertenecientes a la empresa del usaurio secretaria
 rutas.post("/all", async (req, res) => {
     console.log(req.body, 'controlller list data users')
     const { empresa } = req.body
@@ -17,7 +15,7 @@ rutas.post("/all", async (req, res) => {
     try {
         const resultado = await vehiculo.listar(datos)
         console.log(resultado)
-
+ 
         return res.json({ data: resultado, ok: true })
     } catch (error) {
         console.log(error)
@@ -156,9 +154,9 @@ rutas.post("/tipo-personal", async (req, res) => {
 rutas.post("/registrar", insertar, async (req, res) => {
 
     try {
-        const { idtipo, idusuario, placa, modelo, creado, usuario } = req.body
+        const { idtipo, idusuario,capacidad, placa, modelo, fil, col, creado, usuario } = req.body
 
-        const datos = { idtipo, idusuario, placa, modelo, creado, usuario }
+        const datos = { idtipo, idusuario, capacidad, placa, modelo, filas: fil, columnas: col, creado, usuario }
         const resultado = await vehiculo.insertar(datos, req.body.empresa)
 
         if (resultado?.existe === 1)
@@ -178,8 +176,8 @@ rutas.post("/registrar", insertar, async (req, res) => {
 
 rutas.post("/actualizar", actualizar, async (req, res) => {
     try {
-        const { id,  idusuario, placa, modelo, modificado, usuario } = req.body
-        const datos = { id, idusuario, placa, modelo, modificado, usuario }
+        const { id, idusuario, placa, modelo,capacidad, fil, col, modificado, usuario, empresa } = req.body
+        const datos = { id, idusuario, placa,capacidad, modelo, fil, col, modificado, empresa,usuario }
         const resultado = await vehiculo.actualizar(datos)
 
         if (resultado?.existe === 1)
@@ -263,9 +261,9 @@ rutas.post("/re-configurar", reConfigurar, async (req, res) => {
     console.log(req.body)
     try {
 
-        const { idvehiculo, idtipo, modificado, usuario } = req.body;
+        const { idvehiculo, idtipo, fil, col, modificado, usuario } = req.body;
         const datos = {
-            idvehiculo, idtipo, modificado, usuario
+            idvehiculo, idtipo, fil, col, modificado, usuario
         }
         const resultado = await vehiculo.reConfigurar(datos)
         return res.json({ data: resultado, ok: true, msg: 'La configuracion del vehiculo se actualizo correctamente, vuelva a registrar asientos' })

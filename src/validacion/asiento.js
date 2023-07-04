@@ -3,16 +3,16 @@ import { validaciones } from "./headers.js"
 
 // registrar vehiculo desde el usuario
 export const insertar = [
-    check('idasientoubi')
-        .exists()
-        .matches(/^\d{1,10}$/),
     check('idvehiculo')
         .exists()
         .matches(/^\d{1,10}$/),
-    check('numero')
+    check('x')
         .exists()
-        .matches(/^[0-9]{1,20}$/),
-    check('capacidad')
+        .matches(/^\d{1,10}$/),
+    check('y')
+        .exists()
+        .matches(/^\d{1,10}$/),
+    check('numero')
         .exists()
         .matches(/^[0-9]{1,20}$/),
     check('creado')

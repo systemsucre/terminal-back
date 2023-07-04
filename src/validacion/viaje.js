@@ -12,6 +12,9 @@ export const insertar = [
     check('fecha')
         .exists()
         .matches(/\d{4}[-]\d{2}[-]\d{2}/),
+    check('costo')
+        .matches(/^[0-9]{1,20}$/),
+
     check('creado')
         .exists()
         .matches(/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/),
@@ -33,6 +36,8 @@ export const actualizar = [
     check('fecha')
         .exists()
         .matches(/\d{4}[-]\d{2}[-]\d{2}/),
+    check('costo')
+        .matches(/^[0-9]{1,20}$/),
     check('modificado')
         .exists()
         .matches(/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/),

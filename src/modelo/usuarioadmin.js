@@ -1,7 +1,7 @@
 
 import pool from './bdConfig.js'
 
-export class Usuario {
+export class UsuarioEmpresa {
 
     // METODOS
 
@@ -11,7 +11,8 @@ export class Usuario {
             u.apellido1,
             u.apellido2,u.celular, u.direccion
             from usuario u inner join rol on rol.id = u.idrol
-            where u.eliminado = false and rol.numero = 3 and u.id != ${pool.escape(id.usuario)} and u.idoficina = ${pool.escape(id.oficina)}
+            inner join oficina o on o.id = u.idoficina
+            where u.eliminado = false and rol.numero = 2  and o.idempresa = ${pool.escape(id.empresa)}
             ORDER by u.id DESC limit 8 ;`;
         const [rows] = await pool.query(sql)
         return rows
@@ -23,11 +24,12 @@ export class Usuario {
             `SELECT u.id, u.username, u.ci, u.nombre,
             u.apellido1,
             u.apellido2,u.celular, u.direccion
+            inner join oficina o on o.id = u.idoficina
             from usuario u inner join rol on rol.id = u.idrol
             where (u.nombre like '${dato.dato}%' or
             u.ci like '${dato.dato}%' or
             u.apellido1  like '${dato.dato}%' or
-            u.apellido2  like '${dato.dato}%') and u.eliminado = false and rol.numero = 3  and u.id != ${pool.escape(dato.usuario)} and u.idoficina = ${pool.escape(dato.oficina)}
+            u.apellido2  like '${dato.dato}%') and u.eliminado = false and rol.numero = 2  and  o.idempresa = ${pool.escape(dato.empresa)}
             ORDER by id`;
         const [rows] = await pool.query(sql)
         return rows
@@ -41,7 +43,8 @@ export class Usuario {
             u.apellido1,
             u.apellido2,u.celular, u.direccion
             from usuario u inner join rol on rol.id = u.idrol
-            where eliminado = false and rol.numero = 3 and u.id != ${pool.escape(id.usuario)} and u.idoficina = ${pool.escape(id.oficina)}
+            inner join oficina o on o.id = u.idoficina
+            where u.eliminado = false and rol.numero = 2 and  o.idempresa = ${pool.escape(id.empresa)}
             and u.id < ${pool.escape(id.id)} ORDER by u.id DESC  limit 10`;
         const [rows] = await pool.query(sql)
         return rows
@@ -53,7 +56,8 @@ export class Usuario {
             u.apellido1,
             u.apellido2,u.celular, u.direccion
             from usuario u inner join rol on rol.id = u.idrol
-            where eliminado = false and rol.numero = 3 and u.id != ${pool.escape(id.usuario)} and u.idoficina = ${pool.escape(id.oficina)}
+            inner join oficina o on o.id = u.idoficina
+            where u.eliminado = false and rol.numero = 2 and o.idempresa = ${pool.escape(id.empresa)}
             and u.id > ${pool.escape(id.id)} limit 10`;
         const [rows] = await pool.query(sql)
         rows.reverse()
@@ -82,7 +86,7 @@ export class Usuario {
             u.apellido2,u.username, u.ci,u.creado, u.modificado, 
             concat(usuario.nombre,' ', usuario.apellido1,' ', usuario.apellido2) as creador, 
             u.direccion, u.celular, DATE_FORMAT(u.creado, "%Y-%m-%d" ) as fechacreacion,
-            DATE_FORMAT(u.modificado, "%Y-%m-%d") as fechamodificado,
+            DATE_FORMAT(u.modificado, "%Y-%m-%d") as fechamodificado, o.id as idoficina,
             o.lugar as oficina,
 
             r.id as idRol, r.rol as rol 
@@ -95,33 +99,34 @@ export class Usuario {
             where u.id = ${pool.escape(id)}`
 
         const [result] = await pool.query(sqlUser)
-        console.log(result)
         return result
     }
 
-    listarRolSecretaria = async () => {
+    oficina = async (empresa) => {
         const sql =
-            `SELECT id as id, rol as nombre from rol where numero = 3`;
+            `SELECT id as id, lugar as nombre from oficina where idempresa =${pool.escape(empresa)} and eliminado = false`;
         const [rows] = await pool.query(sql)
+        const sqlR =
+        `SELECT id as id, rol as nombre from rol where numero = 2`;
+    const [rowsR] = await pool.query(sqlR)
 
-        return rows
+        return [rows, rowsR]
     }
 
 
     eliminar = async (datos) => {
-        // console.log('eliminar usuario ',datos )
+        console.log('eliminar usuario ',datos )
         const sql = `update usuario set eliminado = true , modificado = ${pool.escape(datos.modificado)}, usuario = ${pool.escape(datos.usuario)}
         WHERE id =  ${pool.escape(datos.id)}`;
         await pool.query(sql)
-        const sqlV = `update vehiculo set eliminado = true , modificado = ${pool.escape(datos.modificado)}, usuario = ${pool.escape(datos.usuario)}
-        WHERE idusuario =  ${pool.escape(datos.id)}`;
-        await pool.query(sqlV)
         return await this.listar(datos)
     }
 
 
 
-    insertarSecretaria = async (datos) => {
+
+
+    insertarSecretaria = async (datos, empresa) => {
         const sqlexisteusername =
             `SELECT username from usuario where
                 username = ${pool.escape(datos.username)}`;
@@ -134,8 +139,7 @@ export class Usuario {
             const [rowsCi] = await pool.query(sqlexisteCi)
             if (rowsCi.length === 0) {
                 await pool.query("INSERT INTO usuario SET  ?", datos)
-                const dato ={usuario:datos.usuario, oficina:datos.idoficina}
-                return await this.listar(dato)
+                return await this.listar({empresa})
             } else return { existe: 2 }
         }
         else return { existe: 1 }
@@ -149,7 +153,7 @@ export class Usuario {
         if (result.length === 0) {
 
             const sql = `UPDATE usuario SET
-                idrol = ${pool.escape(datos.idrol)},
+                idoficina = ${pool.escape(datos.idoficina)},
                 nombre = ${pool.escape(datos.nombre)},
                 apellido1 = ${pool.escape(datos.apellido1)},
                 apellido2 = ${pool.escape(datos.apellido2)},
@@ -214,7 +218,6 @@ export class Usuario {
                      where u.id = ${pool.escape(id)}
                      `;
         const [rows] = await pool.query(sql)
-        console.log(rows)
         return rows
     }
 
